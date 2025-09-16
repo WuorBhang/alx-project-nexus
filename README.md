@@ -1,127 +1,196 @@
-# ProDev Backend Engineering Program
+# Online Voting System
 
-## Overview
+A complete full-stack online voting system built with Django, Django REST Framework, and PostgreSQL.
 
-The ProDev Backend Engineering program is a comprehensive initiative aimed at developing skilled backend engineers capable of building scalable, efficient, and secure server-side applications. Participants dive into modern backend technologies and practices, focusing on real-world projects like the Online Poll System to apply learned concepts. The program emphasizes collaboration, best practices, and problem-solving in a team environment, preparing learners for professional development roles.
+## Features
 
-## Major Learnings
+- User authentication with role-based permissions (Admin and Voter)
+- Poll creation and management
+- Position and candidate management
+- Secure voting functionality
+- Real-time results calculation
+- Automated notifications when polls end
+- API documentation with Swagger and ReDoc
 
-### Key Technologies Covered
+## Tech Stack
 
-- **Python**: Core programming language for backend logic and scripting.
-- **Django**: High-level web framework for building robust applications quickly.
-- **REST APIs**: Designing stateless, scalable web services for data exchange.
-- **GraphQL**: Advanced API querying for flexible data retrieval.
-- **Docker**: Containerization for consistent development and deployment environments.
-- **CI/CD**: Automation pipelines for continuous integration, testing, and deployment.
+- **Backend**: Django 5.2.6, Django REST Framework 3.16.1
+- **Database**: PostgreSQL
+- **Asynchronous Tasks**: Celery 5.5.3 with Redis 6.4.0
+- **API Documentation**: drf-spectacular 0.28.0
+- **Frontend**: HTML, CSS, JavaScript
 
-### Important Backend Development Concepts
+## Setup Instructions
 
-- **Database Design**: Structuring relational and non-relational databases for optimal performance, normalization, and scalability.
-- **Asynchronous Programming**: Using async/await patterns to handle concurrent operations, improving responsiveness in I/O-bound tasks.
-- **Caching Strategies**: Implementing in-memory caching (e.g., Redis) to reduce database hits and enhance application speed.
+### Prerequisites
 
-### Challenges Faced and Solutions Implemented
+- Python 3.11+
+- PostgreSQL
+- Redis
 
-Throughout the program, challenges included handling real-time data processing for voting systems to prevent delays, ensuring secure user verification to avoid fraud, and optimizing queries for high-traffic scenarios. Solutions involved designing efficient PostgreSQL schemas with indexes for fast vote counting, integrating national ID validation via external APIs for automated user verification, and applying asynchronous tasks with Celery for background processing. Duplicate voting was mitigated through unique constraints and session-based checks.
+### 1. Clone the repository
 
-### Best Practices and Personal Takeaways
+```bash
+git clone https://github.com/WuorBhang/alx-project-nexus.git
+cd alx-project-nexus.git
+```
 
-- Follow PEP 8 style guidelines for clean, readable Python code.
-- Use modular architecture, version control with meaningful commits, and comprehensive testing (unit and integration).
-- Prioritize security (e.g., input validation, authentication tokens) and documentation for maintainability.
-- Personal takeaways: The value of iterative development, the impact of caching on performance, and the importance of cross-team collaboration—especially with frontend developers—to ensure seamless API integration. Collaboration fosters innovation and faster problem resolution.
+### 2. Create and activate a virtual environment
 
-## Project: Building a Backend for an Online Poll System
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-### Real-World Application
+### 3. Install dependencies
 
-This project simulates backend development for applications requiring real-time data processing. Developers gain experience with building scalable APIs for real-time voting systems, optimizing database schemas for frequent operations, and documenting/deploying APIs for public access.
+```bash
+pip install -r requirements.txt
+```
 
-### Overview
+### 4. Set up PostgreSQL database
 
-This case study focuses on creating a backend for an online poll system. The backend provides APIs for poll creation, voting, and real-time result computation. The project emphasizes efficient database design and detailed API documentation. To support full-stack functionality, the system includes user registration and national ID-based verification, where users input their ID, and the app fetches details (e.g., name) from government data sources via secure API integration for authentication before allowing votes.
+```bash
+# Start PostgreSQL service
+sudo service postgresql start
 
-### Project Goals
+# Create database and user
+sudo -u postgres psql
 
-The primary objectives of the poll system backend are:
+postgres=# CREATE DATABASE voting_system;
+postgres=# CREATE USER postgres WITH PASSWORD 'postgres';
+postgres=# ALTER ROLE postgres SET client_encoding TO 'utf8';
+postgres=# ALTER ROLE postgres SET default_transaction_isolation TO 'read committed';
+postgres=# ALTER ROLE postgres SET timezone TO 'UTC';
+postgres=# GRANT ALL PRIVILEGES ON DATABASE voting_system TO postgres;
+postgres=# \q
+```
 
-- **API Development**: Build APIs for creating polls, user registration, voting, and fetching results.
-- **Database Efficiency**: Design schemas optimized for real-time result computation and secure user data storage.
-- **Documentation**: Provide detailed API documentation using Swagger.
+### 5. Apply migrations
 
-### Technologies Used
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
 
-- **Django**: High-level Python framework for rapid development.
-- **PostgreSQL**: Relational database for poll, vote, and user storage.
-- **Swagger**: For API documentation.
+### 6. Create a superuser (Admin)
 
-### Key Features
+```bash
+python manage.py createsuperuser
+```
 
-1. **Poll Management**
+### 7. Start Redis server
 
-   - APIs to create polls with multiple options (admin-only for candidate registration).
-   - Include metadata such as creation date, expiry, and poll status.
+```bash
+redis-server
+```
 
-2. **User Registration and Authentication**
+### 8. Start Celery worker
 
-   - User signup/login endpoints.
-   - National ID input for verification: Automatically fetch and validate user details (e.g., name) from government databases via integrated API.
-   - Secure token-based authentication to enable voting.
+```bash
+celery -A voting_system_project worker -l info
+```
 
-3. **Voting System**
+### 9. Run the development server
 
-   - APIs for authenticated users to cast votes for registered candidates.
-   - Implement validations to prevent duplicate voting using national ID uniqueness.
+```bash
+python manage.py runserver
+```
 
-4. **Result Computation**
+## API Endpoints
 
-   - Real-time calculation of vote counts for each option/candidate.
-   - Efficient query design for scalability, with caching for frequent access.
+### Authentication
 
-5. **API Documentation**
+- `POST /api/register/`: Register a new voter
+- `POST /api/login/`: Authenticate a user and return a token
 
-   - Use Swagger to document all endpoints, including authentication flows.
-   - Host documentation at `/api/docs` for easy access.
+### Polls
 
-### Implementation Process
+- `GET /api/polls/`: List all polls
+- `GET /api/polls/<id>/`: Get details of a specific poll
+- `POST /api/polls/<id>/vote/`: Cast a vote for a specific candidate
+- `GET /api/polls/<id>/results/`: Get the results of a poll
 
-#### Git Commit Workflow
+### API Documentation
 
-- **Initial Setup**: feat: set up Django project with PostgreSQL
-- **Feature Development**:
-  - feat: implement user registration and national ID verification APIs
-  - feat: implement poll creation (admin) and voting APIs
-  - feat: add results computation API with real-time updates
-- **Optimization**:
-  - perf: optimize vote counting queries and add caching
-- **Documentation**:
-  - feat: integrate Swagger documentation
-  - docs: update README with API usage, setup instructions, and examples
+- `/api/docs/`: Swagger UI documentation
+- `/api/redoc/`: ReDoc documentation
+- `/api/schema/`: Raw schema
 
-### Submission Details
+## Postman API Examples
 
-- **Deployment**: Host the API and Swagger documentation on a cloud platform (e.g., Heroku or AWS) for public access.
+### Register a new voter
 
-### Evaluation Criteria
+```
+POST /api/register/
+Content-Type: application/json
 
-1. **Functionality**
+{
+    "username": "voter1",
+    "password": "securepassword123",
+    "password2": "securepassword123",
+    "email": "voter1@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "phone_number": "1234567890"
+}
+```
 
-   - Polls, candidates, and options are created and stored accurately.
-   - User registration with national ID verification works seamlessly.
-   - Voting functions without duplication errors or unauthorized access.
+### Login
 
-2. **Code Quality**
+```
+POST /api/login/
+Content-Type: application/json
 
-   - Code adheres to Django best practices and is modular.
-   - PostgreSQL models are efficient, normalized, and secure.
+{
+    "username": "voter1",
+    "password": "securepassword123"
+}
+```
 
-3. **Performance**
+### Get all polls
 
-   - Vote counting queries are optimized for scalability.
-   - Real-time results are computed efficiently with caching.
+```
+GET /api/polls/
+Authorization: Token <your-token>
+```
 
-4. **Documentation**
+### Get poll details
 
-   - Swagger documentation is detailed and accessible.
-   - README includes setup instructions, API usage examples, and collaboration notes.
+```
+GET /api/polls/1/
+Authorization: Token <your-token>
+```
+
+### Cast a vote
+
+```
+POST /api/polls/1/vote/
+Authorization: Token <your-token>
+Content-Type: application/json
+
+{
+    "position": 1,
+    "candidate": 3
+}
+```
+
+### Get poll results
+
+```
+GET /api/polls/1/results/
+Authorization: Token <your-token>
+```
+
+## Frontend
+
+The frontend is built with HTML, CSS, and JavaScript. It communicates with the backend via API calls.
+
+To access the frontend, navigate to:
+
+- Landing Page: `http://localhost:8000/`
+- Registration Page: `http://localhost:8000/register.html`
+- Login Page: `http://localhost:8000/login.html`
+- Polls List Page: `http://localhost:8000/polls.html`
+- Poll Detail Page: `http://localhost:8000/poll-detail.html?id=1`
+- Results Page: `http://localhost:8000/poll-results.html?id=1`
