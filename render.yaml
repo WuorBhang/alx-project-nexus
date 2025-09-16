@@ -1,0 +1,72 @@
+# render.yaml
+
+services:
+  # ----------------------------
+  # 1. PostgreSQL Database
+  # ----------------------------
+  - type: postgres
+    name: voting-db
+    databaseName: voting_system
+    user: root
+    password: 1245  # ⚠️ In production, use env var or Render secret!
+    plan: free
+
+  # ----------------------------
+  # 2. Redis Instance (for Celery)
+  # ----------------------------
+  - type: redis
+    name: voting-redis
+    plan: free
+
+  # ----------------------------
+  # 3. Django Web Service
+  # ----------------------------
+  - type: web
+    name: voting-web
+    env: python
+    pythonVersion: "3.12"  # 👈 Stable & compatible with all your deps
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+    startCommand: gunicorn voting_system.wsgi:application
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: postgres
+          name: voting-db
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: voting-redis
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://your-frontend-domain.com"  # Optional, if using CORS
+    healthCheckPath: /health/  # Optional: create a simple health check endpoint
+    plan: free
+
+  # ----------------------------
+  # 4. Celery Worker (Background Tasks)
+  # ----------------------------
+  - type: worker
+    name: voting-worker
+    env: python
+    pythonVersion: "3.12"
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A voting_system worker --loglevel=info
+    envVars:
+      - key: DATABASE_URL
+        fromService:
+          type: postgres
+          name: voting-db
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: voting-redis
+      - key: SECRET_KEY
+        sync: true  # Syncs with web service's generated SECRET_KEY
+    plan: free
