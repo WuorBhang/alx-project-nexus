@@ -4,7 +4,7 @@ Django settings for alx-project-nexus project.
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import dj_database_url
 
 
@@ -73,7 +73,7 @@ WSGI_APPLICATION = 'alx-project-nexus.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-load_dotenv()
+# load_dotenv()
 
 
 DATABASES = {
