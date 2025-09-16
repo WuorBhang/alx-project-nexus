@@ -3,6 +3,9 @@ djangorestframework
 psycopg2-binary
 celery
 redis
-Pillow
+Pillow>=10.3.0
 drf-spectacular
 django-cors-headers
+dj-database-url
+django-environ
+django-filter
