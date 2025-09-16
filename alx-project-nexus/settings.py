@@ -161,8 +161,16 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only, restrict in production
+
+CORS_ALLOWED_ORIGINS = [
+    "https://alx-project-nexus-yyh0.onrender.com",
+]
+
+# If using DRF Token Auth, you may need:
+CSRF_TRUSTED_ORIGINS = [
+    "https://alx-project-nexus-yyh0.onrender.com",
+]
+
 
 # Celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
