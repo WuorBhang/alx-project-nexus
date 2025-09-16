@@ -1,8 +1,8 @@
-Django==5.2.6
-djangorestframework==3.16.1
-psycopg2-binary==2.9.10
-celery==5.5.3
-redis==6.4.0
-Pillow==10.2.0
-drf-spectacular==0.28.0
-django-cors-headers==4.8.0
+Django
+djangorestframework
+psycopg2-binary
+celery
+redis
+Pillow
+drf-spectacular
+django-cors-headers
