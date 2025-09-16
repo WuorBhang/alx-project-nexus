@@ -32,7 +32,7 @@ A complete full-stack online voting system built with Django, Django REST Framew
 
 ```bash
 git clone https://github.com/WuorBhang/alx-project-nexus.git
-cd alx-project-nexus.git
+cd alx-project-nexus
 ```
 
 ### 2. Create and activate a virtual environment
@@ -88,7 +88,7 @@ redis-server
 ### 8. Start Celery worker
 
 ```bash
-celery -A voting_system_project worker -l info
+celery -A alx-project-nexus worker -l info
 ```
 
 ### 9. Run the development server
