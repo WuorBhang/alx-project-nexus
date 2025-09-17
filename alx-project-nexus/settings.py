@@ -81,24 +81,24 @@ WSGI_APPLICATION = 'alx-project-nexus.wsgi.application'
 # load_dotenv()
 
 
-# Database configuration
-if os.getenv('DATABASE_URL'):
-    # Production database configuration
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+# # Database configuration
+# if os.getenv('DATABASE_URL'):
+#     # Production database configuration
+#     DATABASES = {
+#         'default': dj_database_url.config(
+#             default=os.getenv('DATABASE_URL'),
+#             conn_max_age=600,
+#             conn_health_checks=True,
+#         )
+#     }
+# else:
+#     Development database configuration (SQLite)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    # Development database configuration (SQLite)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
 
 # DATABASES = {
 #     'default': {
