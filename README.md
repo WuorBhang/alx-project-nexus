@@ -114,23 +114,39 @@ python manage.py migrate
 
 ### 7. Create a superuser (Admin)
 
+#### Option 1: Automated Superuser Creation
+```bash
+python manage.py create_superuser --username wuor --password 1234 --email admin@alx-project-nexus.com
+```
+
+#### Option 2: Using the Shell Script
+```bash
+./create_admin.sh
+```
+
+#### Option 3: Manual Creation
 ```bash
 python manage.py createsuperuser
 ```
 
-### 8. Start Redis server
+**Default Admin Credentials:**
+- Username: `wuor`
+- Password: `1234`
+- Admin URL: `/admin/`
+
+### 9. Start Redis server
 
 ```bash
 redis-server
 ```
 
-### 9. Start Celery worker
+### 10. Start Celery worker
 
 ```bash
 celery -A alx-project-nexus worker -l info
 ```
 
-### 10. Run the development server
+### 11. Run the development server
 
 ```bash
 python manage.py runserver
@@ -233,6 +249,7 @@ To access the frontend, navigate to:
 - Polls List Page: `http://localhost:8000/polls.html`
 - Poll Detail Page: `http://localhost:8000/poll-detail.html?id=1`
 - Results Page: `http://localhost:8000/poll-results.html?id=1`
+- Admin Panel: `http://localhost:8000/admin/` (Username: wuor, Password: 1234)
 
 ## Deployment on Render
 

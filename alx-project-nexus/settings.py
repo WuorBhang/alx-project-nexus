@@ -17,7 +17,18 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-w9z8w(ka4o*fobss_j%kzwc)&n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes', 'on')
 
-ALLOWED_HOSTS = ['alx-project-nexus-yyh0.onrender.com', '*']
+# ALLOWED_HOSTS configuration
+ALLOWED_HOSTS_ENV = os.getenv('ALLOWED_HOSTS', '')
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = ALLOWED_HOSTS_ENV.split(',')
+else:
+    # Default hosts for development and production
+    ALLOWED_HOSTS = [
+        'alx-project-nexus-yyh0.onrender.com',
+        'localhost',
+        '127.0.0.1',
+        '*'
+    ]
 
 # Application definition
 INSTALLED_APPS = [
