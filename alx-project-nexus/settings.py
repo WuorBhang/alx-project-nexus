@@ -17,7 +17,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-w9z8w(ka4o*fobss_j%kzwc)&n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['alx-project-nexus-yyh0.onrender.com', '*']
+ALLOWED_HOSTS = ['alx-project-nexus-yyh0.onrender.com', 'alx-project-nexus-pf6x.onrender.com', '*.onrender.com', '*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -54,6 +54,8 @@ MIDDLEWARE = [
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_NAME = 'csrftoken'
 
 ROOT_URLCONF = 'alx-project-nexus.urls'
 
@@ -186,6 +188,8 @@ SPECTACULAR_SETTINGS = {
 
 CORS_ALLOWED_ORIGINS = [
     "https://alx-project-nexus-yyh0.onrender.com",
+    "https://alx-project-nexus-pf6x.onrender.com",
+    "https://*.onrender.com",
     "http://localhost:8000",
     "http://127.0.0.1:8000",
 ]
@@ -197,6 +201,8 @@ if CSRF_TRUSTED_ORIGINS_ENV:
 else:
     CSRF_TRUSTED_ORIGINS = [
         "https://alx-project-nexus-yyh0.onrender.com",
+        "https://alx-project-nexus-pf6x.onrender.com",
+        "https://*.onrender.com",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ]
