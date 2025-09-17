@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.contrib import messages
+from django.utils import timezone
+from django.db.models import Count
 from .models import Poll, Position, Candidate, Vote
 
 class PositionInline(admin.TabularInline):
@@ -10,6 +13,47 @@ class CandidateInline(admin.TabularInline):
     extra = 3
     fields = ('name', 'position', 'profile_picture', 'description')
 
+def calculate_poll_results_action(modeladmin, request, queryset):
+    """Admin action to manually calculate poll results"""
+    for poll in queryset:
+        if not poll.has_ended:
+            messages.warning(request, f'Poll "{poll.title}" has not ended yet')
+            continue
+        
+        try:
+            results = {}
+            
+            # Calculate results for each position
+            for position in poll.positions.all():
+                candidates = position.candidates.annotate(
+                    vote_count=Count('votes')
+                ).order_by('-vote_count')
+                
+                winner = candidates.first()
+                
+                if winner and winner.vote_count > 0:
+                    results[position.title] = {
+                        'winner': winner.name,
+                        'vote_count': winner.vote_count,
+                    }
+            
+            # Update poll status to 'Ended'
+            poll.status = 'Ended'
+            poll.save()
+            
+            messages.success(
+                request, 
+                f'Results calculated for poll "{poll.title}". Status updated to Ended.'
+            )
+            
+        except Exception as e:
+            messages.error(
+                request, 
+                f'Error calculating results for poll "{poll.title}": {str(e)}'
+            )
+
+calculate_poll_results_action.short_description = "Calculate poll results"
+
 @admin.register(Poll)
 class PollAdmin(admin.ModelAdmin):
     list_display = ('title', 'start_time', 'duration', 'status')
@@ -17,6 +61,7 @@ class PollAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description')
     inlines = [PositionInline]
     readonly_fields = ('status',)
+    actions = [calculate_poll_results_action]
     
     def status(self, obj):
         return obj.status

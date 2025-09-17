@@ -118,17 +118,19 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 8. Start Redis server
+### 8. Start Redis server (Optional)
 
 ```bash
 redis-server
 ```
 
-### 9. Start Celery worker
+### 9. Start Celery worker (Optional)
 
 ```bash
 celery -A alx-project-nexus worker -l info
 ```
+
+**Note**: Redis and Celery are optional. The application works without them, but you'll need to manually calculate poll results using the admin panel or management commands.
 
 ### 10. Run the development server
 
@@ -233,6 +235,30 @@ To access the frontend, navigate to:
 - Polls List Page: `http://localhost:8000/polls.html`
 - Poll Detail Page: `http://localhost:8000/poll-detail.html?id=1`
 - Results Page: `http://localhost:8000/poll-results.html?id=1`
+- Admin Panel: `http://localhost:8000/admin/`
+
+## Poll Results Calculation
+
+### Automatic (with Redis/Celery)
+When Redis and Celery are available, poll results are calculated automatically when polls end.
+
+### Manual (without Redis/Celery)
+When Redis is not available, you need to manually calculate poll results:
+
+#### Method 1: Admin Panel
+1. Go to `/admin/polls/poll/`
+2. Select the polls you want to process
+3. Choose "Calculate poll results" from the Actions dropdown
+4. Click "Go"
+
+#### Method 2: Management Command
+```bash
+# Calculate results for all ended polls
+python manage.py calculate_results --all
+
+# Calculate results for a specific poll
+python manage.py calculate_results --poll-id 1
+```
 
 ## Deployment on Render
 
