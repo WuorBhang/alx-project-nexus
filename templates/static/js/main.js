@@ -59,7 +59,8 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
     
     const config = {
         method,
-        headers
+        headers,
+        credentials: 'same-origin'
     };
     
     if (data && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
@@ -67,42 +68,78 @@ async function apiRequest(endpoint, method = 'GET', data = null) {
     }
     
     try {
+        console.log(`Making ${method} request to: ${apiBaseUrl}${endpoint}`);
         const response = await fetch(`${apiBaseUrl}${endpoint}`, config);
+        
+        console.log(`Response status: ${response.status}`);
         
         if (response.status === 401) {
             // Unauthorized - clear token and redirect to login
             localStorage.removeItem('authToken');
             localStorage.removeItem('currentUser');
+            authToken = null;
+            currentUser = null;
             window.location.href = '/login.html';
             return null;
         }
         
-        const result = await response.json();
+        let result;
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            result = await response.json();
+        } else {
+            result = await response.text();
+        }
         
         if (!response.ok) {
-            throw new Error(result.error || 'Something went wrong');
+            let errorMessage = 'Something went wrong';
+            if (result && typeof result === 'object') {
+                if (result.error) {
+                    errorMessage = result.error;
+                } else if (result.detail) {
+                    errorMessage = result.detail;
+                } else if (result.non_field_errors) {
+                    errorMessage = Array.isArray(result.non_field_errors) ? result.non_field_errors[0] : result.non_field_errors;
+                } else {
+                    // Handle field-specific errors
+                    const fieldErrors = Object.values(result).flat();
+                    if (fieldErrors.length > 0) {
+                        errorMessage = fieldErrors[0];
+                    }
+                }
+            } else if (typeof result === 'string') {
+                errorMessage = result;
+            }
+            throw new Error(errorMessage);
         }
         
         return result;
     } catch (error) {
         console.error('API Error:', error);
-        showAlert(error.message);
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            showAlert('Network error: Unable to connect to the server. Please check your internet connection.');
+        } else {
+            showAlert(error.message || 'An unexpected error occurred');
+        }
         return null;
     }
 }
 
 // Authentication Functions
 async function registerUser(userData) {
+    console.log('Registering user with data:', userData);
     const result = await apiRequest('/register/', 'POST', userData);
-    if (result) {
+    if (result && result.token && result.user) {
         authToken = result.token;
         currentUser = result.user;
         
         localStorage.setItem('authToken', authToken);
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         
+        console.log('Registration successful');
         return true;
     }
+    console.log('Registration failed');
     return false;
 }
 
@@ -218,24 +255,58 @@ function initRegisterPage() {
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        // Clear any existing alerts
+        const alertContainer = document.getElementById('alert-container');
+        if (alertContainer) {
+            alertContainer.innerHTML = '';
+        }
+        
         const userData = {
-            username: document.getElementById('username').value,
+            username: document.getElementById('username').value.trim(),
             password: document.getElementById('password').value,
             password2: document.getElementById('password2').value,
-            email: document.getElementById('email').value,
-            first_name: document.getElementById('first_name').value,
-            last_name: document.getElementById('last_name').value,
-            phone_number: document.getElementById('phone_number').value
+            email: document.getElementById('email').value.trim(),
+            first_name: document.getElementById('first_name').value.trim(),
+            last_name: document.getElementById('last_name').value.trim(),
+            phone_number: document.getElementById('phone_number').value.trim()
         };
+        
+        // Basic validation
+        if (!userData.username || !userData.password || !userData.email || !userData.first_name || !userData.last_name) {
+            showAlert('Please fill in all required fields');
+            return;
+        }
         
         if (userData.password !== userData.password2) {
             showAlert('Passwords do not match');
             return;
         }
         
-        const success = await registerUser(userData);
-        if (success) {
-            window.location.href = '/polls.html';
+        if (userData.password.length < 8) {
+            showAlert('Password must be at least 8 characters long');
+            return;
+        }
+        
+        // Disable submit button to prevent double submission
+        const submitBtn = registerForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Registering...';
+        
+        try {
+            const success = await registerUser(userData);
+            if (success) {
+                showAlert('Registration successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/polls.html';
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Registration error:', error);
+        } finally {
+            // Re-enable submit button
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
         }
     });
 }

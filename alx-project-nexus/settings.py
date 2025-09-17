@@ -50,6 +50,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# CSRF settings for API endpoints
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
 ROOT_URLCONF = 'alx-project-nexus.urls'
 
 TEMPLATES = [
@@ -76,13 +81,24 @@ WSGI_APPLICATION = 'alx-project-nexus.wsgi.application'
 load_dotenv()
 
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+# Database configuration
+if os.getenv('DATABASE_URL'):
+    # Production database configuration
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.getenv('DATABASE_URL'),
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+else:
+    # Development database configuration (SQLite)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # DATABASES = {
 #     'default': {
@@ -151,6 +167,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
 }
 
 # DRF Spectacular settings
@@ -161,8 +183,22 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-# CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only, restrict in production
+CORS_ALLOWED_ORIGINS = [
+    "https://alx-project-nexus-yyh0.onrender.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+# If using DRF Token Auth, you may need:
+CSRF_TRUSTED_ORIGINS = [
+    "https://alx-project-nexus-yyh0.onrender.com",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+
+# Allow all origins in development
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
 
 # Celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
