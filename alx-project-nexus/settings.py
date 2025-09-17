@@ -15,7 +15,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-w9z8w(ka4o*fobss_j%kzwc)&nd$rwy%%b!#z7c#td8e3e$im0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes', 'on')
+DEBUG = True
 
 ALLOWED_HOSTS = ['alx-project-nexus-yyh0.onrender.com', '*']
 
