@@ -12,10 +12,10 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-w9z8w(ka4o*fobss_j%kzwc)&nd$rwy%%b!#z7c#td8e3e$im0'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-w9z8w(ka4o*fobss_j%kzwc)&nd$rwy%%b!#z7c#td8e3e$im0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes', 'on')
 
 ALLOWED_HOSTS = ['alx-project-nexus-yyh0.onrender.com', '*']
 
@@ -190,12 +190,16 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
-# If using DRF Token Auth, you may need:
-CSRF_TRUSTED_ORIGINS = [
-    "https://alx-project-nexus-yyh0.onrender.com",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-]
+# CSRF Configuration
+CSRF_TRUSTED_ORIGINS_ENV = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+if CSRF_TRUSTED_ORIGINS_ENV:
+    CSRF_TRUSTED_ORIGINS = CSRF_TRUSTED_ORIGINS_ENV.split(',')
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        "https://alx-project-nexus-yyh0.onrender.com",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
+    ]
 
 # Allow all origins in development
 if DEBUG:
@@ -203,8 +207,8 @@ if DEBUG:
     
 
 # Celery settings
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

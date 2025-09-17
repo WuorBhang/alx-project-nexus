@@ -48,7 +48,46 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Set up PostgreSQL database
+### 4. Environment Variables
+
+Create a `.env` file in the project root with the following variables:
+
+```bash
+# Copy the example file
+cp env.example .env
+```
+
+Then edit `.env` with your actual values:
+
+```env
+# Database Configuration
+DB_NAME=voting_system
+DB_USER=postgres
+DB_PASSWORD=your_secure_password_here
+
+# Django Configuration
+SECRET_KEY=your-secret-key-here
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+# CORS Configuration (for development)
+CORS_ALLOWED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+
+# CSRF Configuration (for development)
+CSRF_TRUSTED_ORIGINS=http://localhost:8000,http://127.0.0.1:8000
+
+# Celery Configuration (if using Redis)
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
+```
+
+**Important Security Notes:**
+- Never commit the `.env` file to version control
+- Use strong, unique passwords for production
+- Generate a secure SECRET_KEY for production
+- Set DEBUG=False in production
+
+### 5. Set up PostgreSQL database
 
 ```bash
 # Start PostgreSQL service
@@ -66,32 +105,32 @@ postgres=# GRANT ALL PRIVILEGES ON DATABASE voting_system TO postgres;
 postgres=# \q
 ```
 
-### 5. Apply migrations
+### 6. Apply migrations
 
 ```bash
 python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 6. Create a superuser (Admin)
+### 7. Create a superuser (Admin)
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 7. Start Redis server
+### 8. Start Redis server
 
 ```bash
 redis-server
 ```
 
-### 8. Start Celery worker
+### 9. Start Celery worker
 
 ```bash
 celery -A alx-project-nexus worker -l info
 ```
 
-### 9. Run the development server
+### 10. Run the development server
 
 ```bash
 python manage.py runserver
@@ -194,3 +233,35 @@ To access the frontend, navigate to:
 - Polls List Page: `http://localhost:8000/polls.html`
 - Poll Detail Page: `http://localhost:8000/poll-detail.html?id=1`
 - Results Page: `http://localhost:8000/poll-results.html?id=1`
+
+## Deployment on Render
+
+### Environment Variables Setup
+
+When deploying to Render, you need to set the following environment variables in your Render dashboard:
+
+#### Database Service Environment Variables:
+- `DB_NAME`: Your database name (e.g., `voting_system_13u3`)
+- `DB_USER`: Your database user (e.g., `root`)
+- `DB_PASSWORD`: Your secure database password
+
+#### Web Service Environment Variables:
+- `DATABASE_URL`: Automatically provided by Render when linking to PostgreSQL service
+- `SECRET_KEY`: Generate a secure secret key (Render can auto-generate this)
+- `DEBUG`: Set to `False` for production
+- `ALLOWED_HOSTS`: Set to your domain (e.g., `.onrender.com,your-app-name.onrender.com`)
+- `CORS_ALLOWED_ORIGINS`: Set to your frontend domain
+- `CSRF_TRUSTED_ORIGINS`: Set to your frontend domain
+
+### Render Configuration
+
+The `render.yaml` file is configured to use environment variables instead of hardcoded secrets. Make sure to set all required environment variables in your Render dashboard before deploying.
+
+### Security Best Practices
+
+1. **Never commit secrets to version control**
+2. **Use strong, unique passwords**
+3. **Generate secure SECRET_KEY for production**
+4. **Set DEBUG=False in production**
+5. **Use HTTPS in production**
+6. **Regularly rotate secrets and passwords**
