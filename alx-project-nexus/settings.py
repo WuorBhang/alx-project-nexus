@@ -15,7 +15,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-w9z8w(ka4o*fobss_j%kzwc)&nd$rwy%%b!#z7c#td8e3e$im0')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes', 'on')
+
+# Honor X-Forwarded-Proto/Host from Render so Django sees HTTPS and correct host
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+# Cookie security
+SESSION_COOKIE_SECURE = not DEBUG
+SECURE_SSL_REDIRECT = not DEBUG
 
 ALLOWED_HOSTS = ['alx-project-nexus-yyh0.onrender.com', 'alx-project-nexus-pf6x.onrender.com', '*.onrender.com', '*']
 
