@@ -4,7 +4,7 @@ Django settings for alx-project-nexus project.
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import dj_database_url
 
 
@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-w9z8w(ka4o*fobss_j%kzwc)&nd$rwy%%b!#z7c#td8e3e$im0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['alx-project-nexus-yyh0.onrender.com', '*']
 
 # Application definition
 INSTALLED_APPS = [
@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'alx-project-nexus.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-load_dotenv()
+# load_dotenv()
 
 
 # Database configuration
@@ -183,6 +183,7 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
+
 CORS_ALLOWED_ORIGINS = [
     "https://alx-project-nexus-yyh0.onrender.com",
     "http://localhost:8000",
@@ -199,6 +200,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Allow all origins in development
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
+    
 
 # Celery settings
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
