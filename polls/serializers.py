@@ -34,29 +34,26 @@ class PollDetailSerializer(serializers.ModelSerializer):
 class VoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = ['id', 'poll', 'position', 'candidate']
+        fields = ['id', 'position', 'candidate']
         read_only_fields = ['voter']
     
     def validate(self, attrs):
+        position = attrs['position']
+        candidate = attrs['candidate']
+        poll = position.poll
+        
         # Check if poll is active
-        poll = attrs['poll']
         if not poll.is_active:
             raise serializers.ValidationError("This poll is not currently active.")
         
-        # Check if position belongs to poll
-        position = attrs['position']
-        if position.poll != poll:
-            raise serializers.ValidationError("This position does not belong to the specified poll.")
-        
         # Check if candidate belongs to position
-        candidate = attrs['candidate']
-        if candidate.position != position or candidate.poll != poll:
-            raise serializers.ValidationError("This candidate does not belong to the specified position and poll.")
+        if candidate.position != position:
+            raise serializers.ValidationError("This candidate does not belong to the specified position.")
         
-        # Check if user has already voted for this position in this poll
+        # Check if user has already voted for this position
         voter = self.context['request'].user
-        if Vote.objects.filter(voter=voter, poll=poll, position=position).exists():
-            raise serializers.ValidationError("You have already voted for this position in this poll.")
+        if Vote.objects.filter(voter=voter, position=position).exists():
+            raise serializers.ValidationError("You have already voted for this position.")
         
         return attrs
     

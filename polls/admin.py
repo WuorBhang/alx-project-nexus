@@ -11,7 +11,7 @@ class PositionInline(admin.TabularInline):
 class CandidateInline(admin.TabularInline):
     model = Candidate
     extra = 3
-    fields = ('name', 'position', 'profile_picture', 'description')
+    fields = ('name', 'profile_picture', 'description')
 
 def calculate_poll_results_action(modeladmin, request, queryset):
     """Admin action to manually calculate poll results"""
@@ -76,15 +76,18 @@ class PositionAdmin(admin.ModelAdmin):
 @admin.register(Candidate)
 class CandidateAdmin(admin.ModelAdmin):
     list_display = ('name', 'position', 'poll')
-    list_filter = ('position', 'poll')
+    list_filter = ('position', 'position__poll')
     search_fields = ('name', 'description')
     
     def poll(self, obj):
-        return obj.position.poll
+        return obj.poll
 
 @admin.register(Vote)
 class VoteAdmin(admin.ModelAdmin):
     list_display = ('voter', 'poll', 'position', 'candidate', 'timestamp')
-    list_filter = ('poll', 'position', 'timestamp')
+    list_filter = ('position__poll', 'position', 'timestamp')
     search_fields = ('voter__username', 'candidate__name')
-    readonly_fields = ('voter', 'poll', 'position', 'candidate', 'timestamp')
+    readonly_fields = ('voter', 'position', 'candidate', 'timestamp')
+    
+    def poll(self, obj):
+        return obj.poll

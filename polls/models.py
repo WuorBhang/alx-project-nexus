@@ -15,7 +15,7 @@ class Poll(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return self.title
+        return str(self.title)
     
     @property
     def end_time(self):
@@ -66,7 +66,6 @@ class Candidate(models.Model):
     """
     Model for candidates running for positions
     """
-    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='candidates')
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='candidates')
     name = models.CharField(max_length=255)
     profile_picture = models.ImageField(upload_to='candidates/', blank=True, null=True)
@@ -74,28 +73,37 @@ class Candidate(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.position.title}"
+    
+    @property
+    def poll(self):
+        """Get the poll through the position"""
+        return self.position.poll
 
 class Vote(models.Model):
     """
     Model to record votes cast by voters
     """
     voter = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='votes')
-    poll = models.ForeignKey(Poll, on_delete=models.CASCADE, related_name='votes')
     position = models.ForeignKey(Position, on_delete=models.CASCADE, related_name='votes')
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE, related_name='votes')
     timestamp = models.DateTimeField(auto_now_add=True)
     
     class Meta:
-        # Ensure a voter can only vote once per position per poll
-        unique_together = ('voter', 'poll', 'position')
+        # Ensure a voter can only vote once per position
+        unique_together = ('voter', 'position')
     
     def __str__(self):
         return f"{self.voter.username} voted for {self.candidate.name}"
     
+    @property
+    def poll(self):
+        """Get the poll through the position"""
+        return self.position.poll
+    
     def clean(self):
-        # Ensure the candidate belongs to the specified position and poll
-        if self.candidate.position != self.position or self.candidate.poll != self.poll:
-            raise ValidationError("Invalid candidate for the specified position and poll.")
+        # Ensure the candidate belongs to the specified position
+        if self.candidate.position != self.position:
+            raise ValidationError("Invalid candidate for the specified position.")
         
         # Ensure the poll is active
         if not self.poll.is_active:
